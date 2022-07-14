@@ -12,7 +12,6 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 
 import { PDP } from 'Component/Header/Header.config';
 import { MENU_TAB } from 'Component/NavigationTabs/NavigationTabs.config';
@@ -23,9 +22,10 @@ import { setBigOfflineNotice } from 'Store/Offline/Offline.action';
 import ProductReducer from 'Store/Product/Product.reducer';
 import { addRecentlyViewedProduct } from 'Store/RecentlyViewedProducts/RecentlyViewedProducts.action';
 import { ProductType } from 'Type/ProductList.type';
-import { HistoryType, LocationType, MatchType } from 'Type/Router.type';
+import { MatchType } from 'Type/Router.type';
 import { scrollToTop } from 'Util/Browser';
 import { withReducers } from 'Util/DynamicReducer';
+import { history } from 'Util/History';
 import { getAttributesWithValues, getIsConfigurableParameterSelected } from 'Util/Product';
 import { debounce } from 'Util/Request';
 import {
@@ -86,7 +86,6 @@ export const mapDispatchToProps = (dispatch) => ({
 /** @namespace Route/ProductPage/Container */
 export class ProductPageContainer extends PureComponent {
     static propTypes = {
-        location: LocationType,
         changeHeaderState: PropTypes.func.isRequired,
         setBigOfflineNotice: PropTypes.func.isRequired,
         changeNavigationState: PropTypes.func.isRequired,
@@ -97,7 +96,6 @@ export class ProductPageContainer extends PureComponent {
         productSKU: PropTypes.string,
         productID: PropTypes.number,
         product: ProductType.isRequired,
-        history: HistoryType.isRequired,
         match: MatchType.isRequired,
         goToPreviousNavigationState: PropTypes.func.isRequired,
         metaTitle: PropTypes.string,
@@ -108,7 +106,6 @@ export class ProductPageContainer extends PureComponent {
     };
 
     static defaultProps = {
-        location: { state: {} },
         productSKU: '',
         productID: 0,
         metaTitle: undefined
@@ -137,9 +134,10 @@ export class ProductPageContainer extends PureComponent {
                 configurable_options,
                 options,
                 productOptionsData
-            },
-            location: { search }
+            }
         } = props;
+
+        const { search } = location;
 
         const {
             currentProductSKU: prevSKU,
@@ -250,7 +248,7 @@ export class ProductPageContainer extends PureComponent {
             }
         } = prevProps;
 
-        const { sku: stateSKU } = history?.state?.state?.product || {};
+        const { sku: stateSKU } = history.location.state?.product || {};
 
         if (isOffline) {
             debounce(this.setOfflineNoticeSize, LOADING_TIME)();
@@ -350,7 +348,7 @@ export class ProductPageContainer extends PureComponent {
     }
 
     getLink(key, value) {
-        const { location: { search, pathname } } = this.props;
+        const { search, pathname } = location;
         const obj = {
             ...convertQueryStringToKeyValuePairs(search)
         };
@@ -365,7 +363,7 @@ export class ProductPageContainer extends PureComponent {
     }
 
     containerProps() {
-        const { isMobile, location, areReviewsEnabled } = this.props;
+        const { isMobile, areReviewsEnabled } = this.props;
         const { parameters } = this.state;
 
         return {
@@ -378,7 +376,6 @@ export class ProductPageContainer extends PureComponent {
             isVariant: this.getIsVariant(),
             isMobile,
             parameters,
-            location,
             areReviewsEnabled
         };
     }
@@ -397,14 +394,12 @@ export class ProductPageContainer extends PureComponent {
     }
 
     updateUrl(key, value, parameters) {
-        const { location, history } = this.props;
-
         const isParameterSelected = getIsConfigurableParameterSelected(parameters, key, value);
 
         if (isParameterSelected) {
-            updateQueryParamWithoutHistory(key, value, history, location);
+            updateQueryParamWithoutHistory(key, value);
         } else {
-            removeQueryParamWithoutHistory(key, history, location);
+            removeQueryParamWithoutHistory(key);
         }
     }
 
@@ -464,7 +459,7 @@ export class ProductPageContainer extends PureComponent {
         } = this.props;
 
         const { sku } = product;
-        const { product: stateProduct } = history?.state?.state || {};
+        const { product: stateProduct } = location?.state || {};
         const { sku: stateSKU } = stateProduct || {};
 
         /**
@@ -546,8 +541,10 @@ export class ProductPageContainer extends PureComponent {
     }
 
     updateBreadcrumbs() {
-        const { updateBreadcrumbs, location } = this.props;
+        const { updateBreadcrumbs } = this.props;
+
         const { state: { prevCategoryId = null } = {} } = location;
+
         updateBreadcrumbs(this.getDataSource(), prevCategoryId);
     }
 
@@ -561,8 +558,7 @@ export class ProductPageContainer extends PureComponent {
     }
 }
 
-export default withReducers({
+export default
+withReducers({
     ProductReducer
-})(withRouter(
-    connect(mapStateToProps, mapDispatchToProps)(ProductPageContainer)
-));
+})(connect(mapStateToProps, mapDispatchToProps)(ProductPageContainer));

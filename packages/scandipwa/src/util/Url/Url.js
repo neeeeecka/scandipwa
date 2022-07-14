@@ -10,16 +10,16 @@
  */
 
 import { decodeString } from 'Util/Common';
+import { history } from 'Util/History';
 import getStore from 'Util/Store';
-
 /**
  * Update query params without adding to history
  * @param {String} name
  * @param {String} value
  * @namespace Util/Url/updateQueryParamWithoutHistory
  */
-export const updateQueryParamWithoutHistory = (name, value, history, location) => {
-    const { search, pathname } = location;
+export const updateQueryParamWithoutHistory = (name, value) => {
+    const { location: { search, pathname } } = history;
 
     const params = new URLSearchParams(search);
     params.set(name, value);
@@ -31,8 +31,8 @@ export const updateQueryParamWithoutHistory = (name, value, history, location) =
  * @param {String} name
  * @namespace Util/Url/removeQueryParamWithoutHistory
  */
-export const removeQueryParamWithoutHistory = (name, history, location) => {
-    const { search, pathname } = location;
+export const removeQueryParamWithoutHistory = (name) => {
+    const { location: { search, pathname } } = history;
 
     const params = new URLSearchParams(search);
     params.delete(name);
@@ -45,7 +45,7 @@ export const removeQueryParamWithoutHistory = (name, history, location) => {
  * @param {Object} location location object from react-router
  * @namespace Util/Url/getUrlParam
  */
-export const getUrlParam = (match, location) => {
+export const getUrlParam = (match) => {
     const baseUrl = match.path.replace(window.storeRegexText, '').replace('/', '');
     const currentUrl = location.pathname.replace(new RegExp(`^${window.storeRegexText}`, 'i'), '');
 

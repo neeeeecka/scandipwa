@@ -13,7 +13,8 @@
 import PropTypes from 'prop-types';
 import { lazy, PureComponent } from 'react';
 
-import { HistoryType, LocationType, MatchType } from 'Type/Router.type';
+import { LocationType, MatchType } from 'Type/Router.type';
+import { history } from 'Util/History';
 
 import {
     TYPE_CATEGORY,
@@ -38,7 +39,6 @@ export class UrlRewrites extends PureComponent {
         props: PropTypes.shape({
             location: LocationType,
             match: MatchType,
-            history: HistoryType,
             categoryIds: PropTypes.number,
             id: PropTypes.number,
             productSKU: PropTypes.string,
@@ -55,8 +55,6 @@ export class UrlRewrites extends PureComponent {
     renderProductPage() {
         const { props } = this.props;
         const {
-            history,
-            location,
             match,
             productSKU,
             id
@@ -67,21 +65,18 @@ export class UrlRewrites extends PureComponent {
         }
 
         return (
-                <ProductPage
-                  history={ history }
-                  location={ location }
-                  match={ match }
-                  productSKU={ productSKU }
-                  productID={ id }
-                  key={ id }
-                />
+            <ProductPage
+              match={ match }
+              productSKU={ productSKU }
+              productID={ id }
+              key={ id }
+            />
         );
     }
 
     renderCmsPage() {
         const { props } = this.props;
         const {
-            history,
             location,
             match,
             pageIds
@@ -100,7 +95,6 @@ export class UrlRewrites extends PureComponent {
     renderCategoryPage() {
         const { props } = this.props;
         const {
-            history,
             location,
             match,
             categoryIds
@@ -119,17 +113,16 @@ export class UrlRewrites extends PureComponent {
     renderNoMatch() {
         const { props } = this.props;
         const {
-            history,
             location,
             match
         } = props;
 
         return (
-        <NoMatch
-          history={ history }
-          location={ location }
-          match={ match }
-        />
+            <NoMatch
+              history={ history }
+              location={ location }
+              match={ match }
+            />
         );
     }
 

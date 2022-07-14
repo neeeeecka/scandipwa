@@ -14,11 +14,11 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import {
-    HistoryType,
     LocationType,
     MatchType,
     UrlRewriteType
 } from 'Type/Router.type';
+import { history } from 'Util/History';
 
 import UrlRewrites from './UrlRewrites.component';
 import {
@@ -59,7 +59,6 @@ export class UrlRewritesContainer extends PureComponent {
     static propTypes = {
         location: LocationType.isRequired,
         match: MatchType.isRequired,
-        history: HistoryType.isRequired,
         isLoading: PropTypes.bool.isRequired,
         requestedUrl: PropTypes.string,
         requestUrlRewrite: PropTypes.func.isRequired,
@@ -79,7 +78,7 @@ export class UrlRewritesContainer extends PureComponent {
     componentDidMount() {
         this.requestUrlRewrite();
 
-        this.initialUrl = location.pathname;
+        this.initialUrl = window.location.pathname;
     }
 
     componentDidUpdate() {
@@ -101,7 +100,7 @@ export class UrlRewritesContainer extends PureComponent {
     }
 
     redirectToCorrectUrl() {
-        const { location, history } = this.props;
+        const { location } = this.props;
 
         const type = this.getType();
 
@@ -140,7 +139,7 @@ export class UrlRewritesContainer extends PureComponent {
              * - fallback to none
              */
             if (isLoading) {
-                const product = history?.state?.state?.product;
+                const product = window.history?.state?.state?.product;
 
                 if (product) {
                     const { sku: historySKU, id } = product;
@@ -165,7 +164,7 @@ export class UrlRewritesContainer extends PureComponent {
              * - fallback to none
              */
             if (isLoading) {
-                const category = history?.state?.state?.category;
+                const category = window.history?.state?.state?.category;
 
                 if (category && category !== true) {
                     return { categoryIds: category };
@@ -184,20 +183,18 @@ export class UrlRewritesContainer extends PureComponent {
     getIsLoading() {
         const { requestedUrl } = this.props;
 
-        return location.pathname !== requestedUrl;
+        return window.location.pathname !== requestedUrl;
     }
 
     getProps() {
         const {
-            location,
             match,
-            history
+            location
         } = this.props;
 
         return {
             location,
             match,
-            history,
             ...this.getTypeSpecificProps()
         };
     }
@@ -223,7 +220,7 @@ export class UrlRewritesContainer extends PureComponent {
          * (which is only valid for 1st load).
          */
         if (this.getIsLoading()) {
-            const state = history?.state?.state || {};
+            const state = window.history?.state?.state || {};
             const typeKey = Object.keys(state).find((key) => UrlRewritesContainer.stateMapping[key]);
 
             if (typeKey) {
@@ -250,7 +247,7 @@ export class UrlRewritesContainer extends PureComponent {
     requestUrlRewrite() {
         const { requestUrlRewrite } = this.props;
 
-        return requestUrlRewrite(location.pathname);
+        return requestUrlRewrite(window.location.pathname);
     }
 
     render() {

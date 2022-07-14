@@ -77,7 +77,9 @@ export class WishlistDispatcher {
                             qty: quantity
                         } = wishlistItem;
 
-                        const priceRange = getPriceRange(product, price, price_without_tax);
+                        const { discount } = product.price_range.minimum_price;
+
+                        const priceRange = getPriceRange(product, price, price_without_tax, discount);
 
                         return {
                             ...prev,
