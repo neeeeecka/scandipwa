@@ -14,30 +14,22 @@ import { PureComponent } from 'react';
 
 import NoMatch from 'Route/NoMatch';
 import { ChildrenType } from 'Type/Common.type';
-import { LocationType } from 'Type/Router.type';
 import { scrollToTop } from 'Util/Browser';
+import { history } from 'Util/History';
 
 /** @namespace Route/NoMatchHandler/Component */
 export class NoMatchHandler extends PureComponent {
     static propTypes = {
         children: ChildrenType.isRequired,
         noMatch: PropTypes.bool.isRequired,
-        updateNoMatch: PropTypes.func.isRequired,
-        location: LocationType.isRequired
+        updateNoMatch: PropTypes.func.isRequired
     };
+
+    onRouteChanged = this.onRouteChanged.bind(this);
 
     componentDidMount() {
         scrollToTop();
-    }
-
-    componentDidUpdate(prevProps) {
-        const { location: { pathname: newPathname } } = this.props;
-        const { location: { pathname } } = prevProps;
-
-        if (newPathname !== pathname) {
-            scrollToTop();
-            this.onRouteChanged();
-        }
+        this.unsubscribeRouteChange = history.onChange(this.onRouteChanged);
     }
 
     componentWillUnmount() {
@@ -49,6 +41,7 @@ export class NoMatchHandler extends PureComponent {
         if (noMatch) {
             updateNoMatch({ noMatch: false });
         }
+        this.unsubscribeRouteChange();
     }
 
     /**
@@ -60,6 +53,8 @@ export class NoMatchHandler extends PureComponent {
             noMatch,
             updateNoMatch
         } = this.props;
+
+        scrollToTop();
 
         if (noMatch) {
             updateNoMatch({ noMatch: false });
